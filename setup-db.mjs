@@ -1,35 +1,58 @@
 import pg from "pg";
 import fs from "fs";
+import dotenv from "dotenv";
+
+
+dotenv.config();
+
+const connectionString = process.env.DATABASE_URL;
 
 const pool = new pg.Pool({
-  host: process.env.DB_HOST,
-  port: process.env.DB_PORT,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  ssl: process.env.DB_SSL === "true" ? { rejectUnauthorized: false } : false
+ 
+  connectionString: connectionString,
+  
+ 
+  host: connectionString ? undefined : (process.env.DB_HOST || "localhost"),
+  port: connectionString ? undefined : (process.env.DB_PORT || 5432),
+  user: connectionString ? undefined : (process.env.DB_USER || "postgres"),
+  password: connectionString ? undefined : (process.env.DB_PASSWORD || "postgres"),
+  database: connectionString ? undefined : (process.env.DB_NAME || "sql_class_2_db"),
+  
+
+  ssl: connectionString ? { rejectUnauthorized: false } : false
 });
 
 async function runFile(filename) {
-  const client = await pool.connect();
+  let client;
   try {
+    client = await pool.connect();
     const sql = fs.readFileSync(filename, "utf8");
     console.log(`Executing ${filename}...`);
     
     await client.query(sql);
-    console.log(`✅ Successfully ran ${filename}`);
+    console.log(`Successfully ran ${filename}`);
   } catch (err) {
-    console.error(`❌ Error running ${filename}:`, err);
+    console.error(`Error running ${filename}:`, err);
+
+    process.exit(1); 
   } finally {
-    client.release();
+    if (client) client.release();
   }
 }
 
 async function start() {
   console.log("Starting database initialization...");
-  // Run the new, compliant schema and mock data
-  await runFile("init.sql");
-  await pool.end(); 
+  
+
+  if (fs.existsSync("init.sql")) {
+    await runFile("init.sql");
+  } else {
+    console.error("init.sql file not found!");
+    process.exit(1);
+  }
+  
+  await pool.end();
+  console.log("Database setup complete. Handing over to application...");
 }
 
 start();
