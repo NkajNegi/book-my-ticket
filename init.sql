@@ -1,0 +1,26 @@
+DROP TABLE IF EXISTS seats, users CASCADE;
+
+
+CREATE TABLE users (
+    user_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    password_hash VARCHAR(255) NOT NULL,
+    role VARCHAR(50) DEFAULT 'customer',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    last_login TIMESTAMP WITH TIME ZONE
+);
+
+
+CREATE TABLE seats (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(255),
+    isbooked INT DEFAULT 0,
+    user_id UUID REFERENCES users(user_id) ON DELETE SET NULL,
+    payment_status VARCHAR(20) DEFAULT 'PENDING',
+    payment_amount DECIMAL(10,2) DEFAULT 0.00,
+    booked_at TIMESTAMP WITH TIME ZONE,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP 
+);
+
+
+INSERT INTO seats (isbooked)
+SELECT 0 FROM generate_series(1, 20);

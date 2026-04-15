@@ -1,141 +1,257 @@
+
 <!doctype html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Stellar Seat Booking</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-      @import url("https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap");
-      body {
-        font-family: "Outfit", sans-serif;
+        @import url("https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&display=swap");
+        body { 
+            font-family: "Outfit", sans-serif; 
         background-color: #0f172a;
         color: #f8fafc;
-      }
+        }
     </style>
-  </head>
-  <body
-    class="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900"
-  >
-    <div
-      class="max-w-7xl w-full bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-2xl p-10 border border-slate-700/50"
-    >
-      <div class="text-center mb-10">
-        <h1
-          class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400 mb-4 tracking-tight"
-        >
-          ChaiCode Cinema - Now Showing<br />
-          <br />
-          <span class="text-red-400">
-            <span class="font-bold">Dhurandhar The Revenge</span>
-          </span>
-        </h1>
-        <p class="text-slate-400 text-lg">Jassi ko ghar ki yaad kyu nhi aai?</p>
-      </div>
+</head>
+<body 
+    class="min-h-screen flex flex-col items-center py-10 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-slate-100 relative">
 
-      <div class="flex justify-center mb-10">
-        <div
-          class="bg-slate-900/50 rounded-full px-6 py-3 border border-slate-700 flex gap-8 items-center"
+    <div 
+        class="max-w-7xl w-full bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-2xl p-10 border border-slate-700/50"
         >
-          <div class="flex items-center gap-3">
-            <div
-              class="w-4 h-4 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.6)]"
-            ></div>
-            <span class="text-slate-300 font-medium tracking-wide"
-              >Available</span
-            >
-          </div>
-          <div class="w-px h-6 bg-slate-700"></div>
-          <div class="flex items-center gap-3">
-            <div
-              class="w-4 h-4 rounded-full bg-rose-500/20 border border-rose-500/50"
-            ></div>
-            <span class="text-slate-400 font-medium tracking-wide">Booked</span>
-          </div>
+        
+        <div class="text-center mb-10">
+            <h1 
+                class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400 mb-2">
+                Dhurandhar The Revenge
+            </h1>
+            <p class="text-slate-400 text-lg">Mock Movie Data • ₹250 per Ticket</p>
         </div>
-      </div>
 
-      <div class="flex justify-center">
-        <div
-          class="bg-slate-900/40 p-8 rounded-2xl border border-slate-700/50 shadow-inner"
-        >
-          <table
-            id="tbl"
-            class="border-separate border-spacing-4 mx-auto"
-          ></table>
+        <div id="auth-section" class="flex flex-col items-center gap-4 mb-8 bg-slate-900/50 p-6 rounded-2xl border border-slate-700">
+            <div id="auth-forms" class="flex flex-wrap justify-center gap-4 w-full">
+                <input type="email" id="email" placeholder="Email" class="px-4 py-2 bg-slate-800 border border-slate-600 rounded-lg text-white outline-none focus:border-emerald-500 w-64" />
+                <input type="password" id="password" placeholder="Password" class="px-4 py-2 bg-slate-800 border border-slate-600 rounded-lg text-white outline-none focus:border-emerald-500 w-64" />
+                <button onclick="login()" class="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-semibold transition-colors">Login</button>
+                <button onclick="register()" class="px-6 py-2 border border-emerald-600 text-emerald-400 hover:bg-emerald-900/50 rounded-lg font-semibold transition-colors">Register</button>
+            </div>
+            
+            <div id="user-info" class="hidden flex items-center gap-4">
+                <div class="px-4 py-2 bg-emerald-500/20 border border-emerald-500/50 rounded-lg text-emerald-300">
+                    Logged in as: <span id="user-email" class="font-bold text-white"></span>
+                </div>
+                <button onclick="logout()" class="px-4 py-2 bg-rose-500/20 hover:bg-rose-500/40 border border-rose-500/50 text-rose-300 rounded-lg transition-colors">Logout</button>
+            </div>
         </div>
-      </div>
+
+        <div class="flex justify-center gap-8 mb-8">
+            <div class="flex items-center gap-2"><div class="w-4 h-4 bg-slate-700 rounded-md"></div><span>Available</span></div>
+            <div class="flex items-center gap-2"><div class="w-4 h-4 bg-rose-500/50 border border-rose-500 rounded-md"></div><span>Booked</span></div>
+        </div>
+
+        <div class="flex justify-center">
+            <div class="bg-slate-900 p-6 rounded-2xl border border-slate-700 shadow-inner overflow-x-auto">
+                <table id="tbl" class="border-separate border-spacing-3 mx-auto"></table>
+            </div>
+        </div>
+    </div>
+
+    <div id="payment-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50">
+        <div class="bg-slate-800 border border-slate-600 p-8 rounded-2xl shadow-2xl max-w-md w-full mx-4">
+            <h2 class="text-2xl font-bold text-white mb-4 border-b border-slate-700 pb-2">Complete Booking</h2>
+            
+            <div class="flex justify-between text-slate-300 mb-2">
+                <span>Seat Number:</span>
+                <span id="modal-seat-id" class="font-bold text-white"></span>
+            </div>
+            <div class="flex justify-between text-slate-300 mb-6">
+                <span>Total Price:</span>
+                <span class="font-bold text-emerald-400">₹250.00</span>
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-sm text-slate-400 mb-1">Ticket Holder Name</label>
+                <input type="text" id="ticket-name" placeholder="Enter your name" class="w-full px-4 py-2 bg-slate-900 border border-slate-600 rounded-lg text-white outline-none focus:border-cyan-500" />
+            </div>
+
+            <div class="flex gap-4">
+                <button onclick="closeModal()" class="flex-1 px-4 py-2 border border-slate-600 text-slate-300 hover:bg-slate-700 rounded-lg font-semibold transition-colors">Cancel</button>
+                <button id="pay-btn" class="flex-1 px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg font-semibold transition-colors flex justify-center items-center">
+                    Pay & Book
+                </button>
+            </div>
+        </div>
     </div>
 
     <script>
-      async function run() {
-        const tbl = document.getElementById("tbl");
-        const res = await fetch("/seats");
-        const resarray = await res.json();
-        const j = resarray.sort((a, b) => a.id - b.id);
-        let tr;
-        for (let i = 0; i < j.length; i++) {
-          if (i % 8 === 0) tr = document.createElement("tr");
+        let authToken = localStorage.getItem("jwt");
+        let activeBookingSeatId = null;
 
-          const td = document.createElement("td");
+        function updateAuthUI() {
+            const forms = document.getElementById("auth-forms");
+            const info = document.getElementById("user-info");
+            const emailSpan = document.getElementById("user-email");
 
-          // Base aesthetic classes - added 'relative group' for tooltip positioning
-          const baseClasses =
-            "w-32 h-32 rounded-2xl text-center align-middle text-2xl font-bold transition-all duration-300 select-none relative group";
-
-          if (j[i].isbooked) {
-            td.className = `${baseClasses} bg-rose-500/10 text-rose-500/60 border border-rose-500/20 cursor-not-allowed`;
-            td.innerHTML = `
-                    <span class="relative z-10">${j[i].id}</span>
-                    <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 px-4 py-2 bg-slate-900 border border-slate-700 text-sm text-slate-300 rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap shadow-2xl z-50 pointer-events-none font-normal shadow-[0_10px_25px_rgba(0,0,0,0.5)]">
-                        Booked by: <span class="font-bold text-white ml-1">${j[i].name}</span>
-                        <div class="absolute top-full left-1/2 -translate-x-1/2 -mt-[1px] border-[6px] border-transparent border-t-slate-700"></div>
-                        <div class="absolute top-full left-1/2 -translate-x-1/2 -mt-[2px] border-[5px] border-transparent border-t-slate-900"></div>
-                    </div>
-                `;
-          } else {
-            td.className = `${baseClasses} bg-emerald-500 text-white border-2 border-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.3)] cursor-pointer hover:bg-emerald-400 hover:-translate-y-1.5 hover:shadow-[0_10px_25px_rgba(16,185,129,0.5)] active:scale-95 active:shadow-[0_0_10px_rgba(16,185,129,0.3)]`;
-            td.innerHTML = `<span class="relative z-10">${j[i].id}</span>`;
-          }
-
-          td.addEventListener("click", async function (e) {
-            const currentTd = e.currentTarget;
-            if (currentTd.classList.contains("cursor-not-allowed")) {
-              return; // Seat is already taken
+            if (authToken) {
+                try {
+                    forms.classList.add("hidden");
+                    info.classList.remove("hidden");
+                    const payload = JSON.parse(atob(authToken.split('.')[1]));
+                    emailSpan.innerText = payload.email;
+                } catch (e) {
+                    // If the token in localStorage is corrupted or invalid, clear it
+                    console.warn("Invalid token detected. Logging out.");
+                    logout();
+                }
+            } else {
+                forms.classList.remove("hidden");
+                info.classList.add("hidden");
             }
+        }
+
+        async function login() {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            const res = await fetch("/api/auth/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                authToken = data.token;
+                localStorage.setItem("jwt", authToken);
+                updateAuthUI();
+            } else {
+                alert("Login failed: " + data.error);
+            }
+        }
+
+        async function register() {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            const res = await fetch("/api/auth/register", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password })
+            });
+            if (res.ok) {
+                alert("Registered successfully! You can now login.");
+            } else {
+                const data = await res.json();
+                alert("Registration failed: " + data.error);
+            }
+        }
+
+        function logout() {
+            authToken = null;
+            localStorage.removeItem("jwt");
+            updateAuthUI();
+        }
+
+        // --- Modal & Payment Logic ---
+        function openModal(seatId) {
+            if (!authToken) {
+                alert("You must be logged in to book a ticket.");
+                return;
+            }
+            activeBookingSeatId = seatId;
+            document.getElementById("modal-seat-id").innerText = seatId;
+            document.getElementById("ticket-name").value = "";
+            document.getElementById("payment-modal").classList.remove("hidden");
+        }
+
+        function closeModal() {
+            activeBookingSeatId = null;
+            document.getElementById("payment-modal").classList.add("hidden");
+        }
+
+        document.getElementById("pay-btn").addEventListener("click", async () => {
+            const name = document.getElementById("ticket-name").value;
+            if (!name) {
+                alert("Please enter a name for the ticket.");
+                return;
+            }
+
+            const btn = document.getElementById("pay-btn");
+            btn.innerHTML = "Processing...";
+            btn.disabled = true;
 
             try {
-              const id = j[i].id; // Safe from loop closure
-              const name = prompt("Enter your name");
-              if (!name) return;
+                const res = await fetch(`/${activeBookingSeatId}/${encodeURIComponent(name)}`, {
+                    method: "PUT",
+                    headers: { "Authorization": `Bearer ${authToken}` }
+                });
 
-              const res = await fetch(`/${id}/${name}`, { method: "PUT" });
-              const data = await res.json();
+                btn.innerHTML = "Pay & Book";
+                btn.disabled = false;
 
-              if (data.error) {
-                alert("FAILED! Couldn't book! already booked.");
-              } else {
-                alert("Booked successfully!");
-                // Visually transition to booked state upon success
-                currentTd.className = `${baseClasses} bg-rose-500/10 text-rose-500/60 border border-rose-500/20 cursor-not-allowed`;
-                currentTd.innerHTML = `
-                            <span class="relative z-10">${id}</span>
-                            <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 px-4 py-2 bg-slate-900 border border-slate-700 text-sm text-slate-300 rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap shadow-2xl z-50 pointer-events-none font-normal shadow-[0_10px_25px_rgba(0,0,0,0.5)]">
-                                Booked by: <span class="font-bold text-white ml-1">${name}</span>
-                                <div class="absolute top-full left-1/2 -translate-x-1/2 -mt-[1px] border-[6px] border-transparent border-t-slate-700"></div>
-                                <div class="absolute top-full left-1/2 -translate-x-1/2 -mt-[2px] border-[5px] border-transparent border-t-slate-900"></div>
-                            </div>
-                        `;
-              }
-            } catch (ex) {
-              alert("error booking " + ex);
+                if (res.status === 401 || res.status === 403) {
+                    alert("Session expired. Please login again.");
+                    closeModal();
+                    logout();
+                    return;
+                }
+
+                // SAFE JSON PARSING: Will not crash if backend fails
+                const text = await res.text();
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (e) {
+                    data = { error: "Invalid server response." };
+                }
+
+                closeModal();
+
+                if (!res.ok || data.error) {
+                    alert(data.error || "Failed to book seat");
+                } else {
+                    run(); // Re-render the grid to show the new booked seat
+                }
+            } catch (error) {
+                btn.innerHTML = "Pay & Book";
+                btn.disabled = false;
+                alert("Network error occurred.");
             }
-          });
-          tr.appendChild(td);
-          tbl.appendChild(tr);
+        });
+        // --- Grid Rendering Logic ---
+        async function run() {
+            const tbl = document.getElementById("tbl");
+            tbl.innerHTML = ""; 
+            
+            const res = await fetch("/seats");
+            const seats = await res.json();
+            seats.sort((a, b) => a.id - b.id);
+            
+            let tr;
+            for (let i = 0; i < seats.length; i++) {
+                if (i % 5 === 0) { 
+                    tr = document.createElement("tr");
+                    tbl.appendChild(tr);
+                }
+
+                const seat = seats[i];
+                const td = document.createElement("td");
+                
+                if (seat.isbooked) {
+                    td.className = "w-16 h-16 rounded-xl text-center align-middle text-lg font-bold bg-rose-500/20 text-rose-300 border border-rose-500/50 cursor-not-allowed";
+                    // FIX: Safe substring handling in case name is null
+                    const safeName = seat.name || 'User';
+                    td.innerHTML = `${seat.id}<br><span class="text-xs font-normal opacity-70">${safeName.substring(0,5)}</span>`;
+                } else {
+                    td.className = "w-16 h-16 rounded-xl text-center align-middle text-lg font-bold bg-slate-700 text-slate-300 border border-slate-600 cursor-pointer hover:bg-emerald-500 hover:text-white hover:border-emerald-400 transition-colors";
+                    td.innerText = seat.id;
+                    
+                    td.addEventListener("click", () => openModal(seat.id));
+                }
+                tr.appendChild(td);
+            }
         }
-      }
-      run();
+        updateAuthUI();
+        run();
     </script>
-  </body>
+</body>
 </html>
