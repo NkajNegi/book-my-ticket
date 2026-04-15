@@ -56,7 +56,7 @@ I've included a `docker-compose.yml` file to make database setup effortless. Ope
 docker-compose up -d
 ```
 
-_Note: This binds the database to port `5433` on your host machine to avoid conflicts with any existing local Postgres instances._
+_Note: This binds the database to port `5432` on your host machine to avoid conflicts with any existing local Postgres instances._
 
 ### Step 3: Initialize the Schema & Mock Data
 

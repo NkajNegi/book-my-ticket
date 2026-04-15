@@ -30,15 +30,30 @@ const port = process.env.PORT || 8080;
 // Pool is nothing but group of connections
 // If you pick one connection out of the pool and release it
 // the pooler will keep that connection open for sometime to other clients to reuse
+// index.mjs
+
+// index.mjs
+
+const connectionString = process.env.DATABASE_URL;
+
 const pool = new pg.Pool({
-  host: "localhost",
-  port: 5433,
-  user: "postgres",
-  password: "postgres",
-  database: "sql_class_2_db",
+  // Use connectionString if it exists (Production),
+  // otherwise fallback to individual fields (Local)
+  connectionString: connectionString,
+
+  // Local fallback settings
+  host: process.env.DB_HOST || "localhost",
+  port: process.env.DB_PORT || 5432,
+  user: process.env.DB_USER || "postgres",
+  password: process.env.DB_PASSWORD || "postgres",
+  database: process.env.DB_NAME || "sql_class_2_db",
+
   max: 20,
-  connectionTimeoutMillis: 0,
-  idleTimeoutMillis: 0,
+  connectionTimeoutMillis: 5000,
+  idleTimeoutMillis: 30000,
+
+  // Render PostgreSQL requires SSL for external connections.
+  ssl: connectionString ? { rejectUnauthorized: false } : false,
 });
 
 // Initialize Express application
@@ -94,7 +109,9 @@ app.post("/api/auth/login", async (req, res) => {
   try {
     const { email, password } = req.body;
     // Find the user by email
-    const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+    const result = await pool.query("SELECT * FROM users WHERE email = $1", [
+      email,
+    ]);
 
     if (result.rowCount === 0)
       return res.status(401).json({ error: "Invalid credentials" });
@@ -108,24 +125,25 @@ app.post("/api/auth/login", async (req, res) => {
 
     // 1. Generate JWT containing the user_id and role
     const token = jwt.sign(
-      { user_id: user.user_id, email: user.email, role: user.role }, 
-      JWT_SECRET, 
-      { expiresIn: "2h" }
+      { user_id: user.user_id, email: user.email, role: user.role },
+      JWT_SECRET,
+      { expiresIn: "2h" },
     );
 
     // 2. Update last_login timestamp in the database
-    await pool.query("UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE user_id = $1", [user.user_id]);
+    await pool.query(
+      "UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE user_id = $1",
+      [user.user_id],
+    );
 
     // 3. Send the single, final response
     res.json({ token, email: user.email });
-    
   } catch (error) {
     console.error("Login Error:", error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 });
 //mine
-
 
 // Serve the main index.html file for the root route
 app.get("/", (req, res) => {
@@ -143,18 +161,18 @@ app.put("/:id/:name", authenticateToken, async (req, res) => {
   let conn; // Scoped outside to ensure access in catch block
   try {
     const id = req.params.id;
-    const name = req.params.name; 
+    const name = req.params.name;
     const userId = req.user.user_id;
 
-    // Hardcoded for this assignment scope. 
+    // Hardcoded for this assignment scope.
     // In production, this data comes from a Stripe/Razorpay webhook.
-    const paymentAmount = 250.00;
-    const paymentStatus = "COMPLETED"; 
+    const paymentAmount = 250.0;
+    const paymentStatus = "COMPLETED";
 
     // Connect to the database and start a transaction
     conn = await pool.connect();
     await conn.query("BEGIN");
-    
+
     // Check if the seat is available and lock it for update to prevent race conditions
     const sql = "SELECT * FROM seats where id = $1 and isbooked = 0 FOR UPDATE";
     const result = await conn.query(sql, [id]);
@@ -164,7 +182,7 @@ app.put("/:id/:name", authenticateToken, async (req, res) => {
       conn.release();
       return res.status(400).json({ error: "Seat already booked" });
     }
-    
+
     // Update the seat with booking and payment details
     const sqlU = `
       UPDATE seats 
@@ -181,9 +199,12 @@ app.put("/:id/:name", authenticateToken, async (req, res) => {
 
     // Commit the transaction to save changes
     await conn.query("COMMIT");
-    conn.release(); 
-    
-    res.json({ success: true, message: "Seat booked and payment completed successfully." });
+    conn.release();
+
+    res.json({
+      success: true,
+      message: "Seat booked and payment completed successfully.",
+    });
   } catch (ex) {
     if (conn) {
       await conn.query("ROLLBACK"); // Crucial: Prevent connection pool exhaustion
@@ -194,13 +215,12 @@ app.put("/:id/:name", authenticateToken, async (req, res) => {
   }
 });
 
-
-
 // Fetch all booked tickets for the authenticated user
 app.get("/api/my-tickets", authenticateToken, async (req, res) => {
   try {
     const userId = req.user.user_id;
-    const sql = "SELECT id, name FROM seats WHERE user_id = $1 AND isbooked = 1";
+    const sql =
+      "SELECT id, name FROM seats WHERE user_id = $1 AND isbooked = 1";
     const result = await pool.query(sql, [userId]);
     res.json(result.rows);
   } catch (ex) {

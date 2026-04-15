@@ -1,16 +1,14 @@
-DROP TABLE IF EXISTS seats, users CASCADE;
 
-
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     user_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    email VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     role VARCHAR(50) DEFAULT 'customer',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     last_login TIMESTAMP WITH TIME ZONE
 );
 
-
-CREATE TABLE seats (
+CREATE TABLE IF NOT EXISTS seats (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255),
     isbooked INT DEFAULT 0,
@@ -21,6 +19,5 @@ CREATE TABLE seats (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP 
 );
 
-
-INSERT INTO seats (isbooked)
-SELECT 0 FROM generate_series(1, 20);
+SELECT 0 FROM generate_series(1, 20)
+WHERE NOT EXISTS (SELECT 1 FROM seats);
